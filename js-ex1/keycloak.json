@@ -1,0 +1,16 @@
+{
+  "realm": "ex1",
+  "auth-server-url": "http://localhost:8180/auth/",
+  "ssl-required": "external",
+  "resource": "hdap",
+  "verify-token-audience": true,
+  "credentials": {
+    "secret": "secret"
+  },
+  "use-resource-role-mappings": true,
+  "confidential-port": 0,
+  "policy-enforcer": {
+
+
+  }
+}
