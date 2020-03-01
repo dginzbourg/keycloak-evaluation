@@ -8,7 +8,7 @@ function protectBySection(token, request) {
     return token.hasRole(request.params.section);
 }
 
-router.get('/:account_id/roles', keycloak.keycloak.enforcer('account-roles:role-view',
+router.get('/:account_id/extensions', keycloak.keycloak.enforcer('extensions:extensions-view',
       {//response_mode: 'token'
         claims: function (request) {
           return {
@@ -17,16 +17,16 @@ router.get('/:account_id/roles', keycloak.keycloak.enforcer('account-roles:role-
         }
       }),
       function (req, res, next) {
-    res.send(`all roles. account: ${req.params.account_id}`);
+    res.send(`view any extensions. account: ${req.params.account_id}`);
 });
 
 
-router.get('/:account_id/roles/:role_id', keycloak.keycloak.enforcer('account-roles:role-assign', {response_mode: 'token'}), function (req, res, next) {
-    res.send(`account: ${req.params.account_id}, role_id: ${req.params.role_id}`);
+router.get('/:account_id/extensions/:ext_id', keycloak.keycloak.enforcer('extensions:extensions-view', {response_mode: 'token'}), function (req, res, next) {
+    res.send(`view account: ${req.params.account_id}, ext_id: ${req.params.ext_id}`);
 });
 
-router.post('/', function (req, res) {
-    res.send('Got a POST request, yep')
+router.post('/:account_id/extensions', keycloak.keycloak.enforcer('extensions:extensions-manage', {response_mode: 'token'}), function (req, res, next) {
+    res.send(`create new ext account: ${req.params.account_id}`);
 })
 
 module.exports = router;
