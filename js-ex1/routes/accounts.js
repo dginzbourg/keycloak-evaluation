@@ -9,23 +9,38 @@ function protectBySection(token, request) {
 }
 
 router.get('/:account_id/extensions', keycloak.keycloak.enforcer('extensions:extensions-view',
-      {//response_mode: 'token'
+    {
+        response_mode: 'token',
         claims: function (request) {
-          return {
-            'ctx.account_id': [request.params.account_id]
-          }
+            return {
+                'ctx.account_id': [request.params.account_id]
+            }
         }
-      }),
-      function (req, res, next) {
-    res.send(`view any extensions. account: ${req.params.account_id}`);
-});
+    }),
+    function (req, res, next) {
+        res.send(`view any extensions. account: ${req.params.account_id}`);
+    });
 
 
-router.get('/:account_id/extensions/:ext_id', keycloak.keycloak.enforcer('extensions:extensions-view', {response_mode: 'token'}), function (req, res, next) {
+router.get('/:account_id/extensions/:ext_id', keycloak.keycloak.enforcer('extensions:extensions-view', {
+    response_mode: 'token',
+    claims: function (request) {
+        return {
+            'ctx.account_id': [request.params.account_id]
+        }
+    }
+}), function (req, res, next) {
     res.send(`view account: ${req.params.account_id}, ext_id: ${req.params.ext_id}`);
 });
 
-router.post('/:account_id/extensions', keycloak.keycloak.enforcer('extensions:extensions-manage', {response_mode: 'token'}), function (req, res, next) {
+router.post('/:account_id/extensions', keycloak.keycloak.enforcer('extensions:extensions-manage', {
+    response_mode: 'token',
+    claims: function (request) {
+        return {
+            'ctx.account_id': [request.params.account_id]
+        }
+    }
+}), function (req, res, next) {
     res.send(`create new ext account: ${req.params.account_id}`);
 })
 
