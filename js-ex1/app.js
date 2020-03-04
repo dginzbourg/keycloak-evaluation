@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
 const indexRouter = require('./routes/index');
-const accountsRouter = require('./routes/accounts');
+const extensionsRouter = require('./routes/extensions');
 const keycloak = require('./keycloak-module');
 const cors = require('cors');
 
@@ -24,7 +24,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/accounts', accountsRouter);
+app.use('/accounts', extensionsRouter);
 
 app.use(keycloak.keycloak.middleware({
     logout: '/logout',

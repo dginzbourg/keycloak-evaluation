@@ -22,7 +22,7 @@ router.get('/:account_id/extensions', keycloak.keycloak.enforcer('extensions:ext
     });
 
 
-router.get('/:account_id/extensions/:ext_id', keycloak.keycloak.enforcer('extensions:extensions-view', {
+router.get('/:account_id/extensions/:ext_id', keycloak.keycloak.enforcer(['extensions:extensions-view'], {
     response_mode: 'token',
     claims: function (request) {
         return {
