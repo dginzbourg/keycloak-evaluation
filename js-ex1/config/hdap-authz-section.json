@@ -1,0 +1,213 @@
+{
+  "allowRemoteResourceManagement": true,
+  "policyEnforcementMode": "ENFORCING",
+  "resources": [
+    {
+      "name": "Default Resource",
+      "type": "urn:hdap-roles:resources:default",
+      "ownerManagedAccess": false,
+      "attributes": {},
+      "_id": "4f4fc35e-1461-4c6f-b9e0-b2c4f3f02fbc",
+      "uris": [
+        "/*"
+      ]
+    },
+    {
+      "name": "account-roles",
+      "type": "urn:hdap-roles:resources:account:role",
+      "ownerManagedAccess": false,
+      "attributes": {},
+      "_id": "cf0b7456-da4b-4d38-a436-afc26c9b0b2f",
+      "uris": [
+        "/accounts/*/roles"
+      ],
+      "scopes": [
+        {
+          "name": "role-assign"
+        },
+        {
+          "name": "role-view"
+        }
+      ]
+    },
+    {
+      "name": "extensions",
+      "ownerManagedAccess": false,
+      "attributes": {},
+      "_id": "6d08bf0b-a2bc-485f-b66a-915b2e464a2f",
+      "uris": [],
+      "scopes": [
+        {
+          "name": "extensions-view"
+        },
+        {
+          "name": "extensions-manage"
+        }
+      ]
+    },
+    {
+      "name": "ext-1",
+      "type": "urn:hdap:extension",
+      "ownerManagedAccess": true,
+      "attributes": {
+        "account_id": [
+          "10"
+        ]
+      },
+      "_id": "e02e4010-8757-4c9f-a4d3-1f85e0e9a076",
+      "uris": [],
+      "scopes": [
+        {
+          "name": "extensions-view"
+        },
+        {
+          "name": "extensions-manage"
+        }
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "id": "3462c24b-ecc1-4092-a064-3516b8c45899",
+      "name": "Default Policy",
+      "description": "A policy that grants access only for users within this realm",
+      "type": "js",
+      "logic": "POSITIVE",
+      "decisionStrategy": "AFFIRMATIVE",
+      "config": {
+        "code": "// by default, grants any permission associated with this policy\n$evaluation.grant();\n"
+      }
+    },
+    {
+      "id": "79a09bd6-19cb-402f-a709-b398f0933577",
+      "name": "has role manage-extensions",
+      "type": "role",
+      "logic": "POSITIVE",
+      "decisionStrategy": "UNANIMOUS",
+      "config": {
+        "roles": "[{\"id\":\"hdap/manage-extensions\",\"required\":true}]"
+      }
+    },
+    {
+      "id": "33e9d7d8-7100-4b70-a438-ba23636faa31",
+      "name": "has role view-extensions",
+      "type": "role",
+      "logic": "POSITIVE",
+      "decisionStrategy": "UNANIMOUS",
+      "config": {
+        "roles": "[{\"id\":\"hdap/view-extensions\",\"required\":true}]"
+      }
+    },
+    {
+      "id": "8bc05d9f-f0c8-4fb8-b1a1-dfc1650972f3",
+      "name": "user belongs to the same account",
+      "type": "js",
+      "logic": "POSITIVE",
+      "decisionStrategy": "UNANIMOUS",
+      "config": {
+        "code": "var context = $evaluation.getContext();\nvar identity = context.getIdentity();\nvar realm = $evaluation.getRealm();\n\nvar attributes = identity.getAttributes();\nvar account_id;\nvar ctx_account_id;\n\nprint('acc_id' + attributes.getValue('account_id').asString(0));\nif(attributes.getValue('account_id'))\n    account_id = attributes.getValue('account_id').asString(0);\n   \n//var claims = context.getAttributes().getValue('ctx.account_id');\nvar claims = context.getAttributes();\n//print('claims'+ claims.getValue('kc.client.network.ip_address').asString(0));\n\nif(claims && claims.getValue('ctx.account_id')){\n    ctx_account_id = claims.getValue('ctx.account_id').asString(0);\n}\n\nprint('user attributes: ' + attributes.toMap());\n  \nif (account_id === ctx_account_id) {\n    $evaluation.grant();\n}"
+      }
+    },
+    {
+      "id": "6acc58f3-2073-45c2-9f70-8777ef8ca127",
+      "name": "has vsu role",
+      "type": "group",
+      "logic": "POSITIVE",
+      "decisionStrategy": "UNANIMOUS",
+      "config": {
+        "groups": "[{\"path\":\"/vsu\",\"extendChildren\":false}]",
+        "groupsClaim": "groups"
+      }
+    },
+    {
+      "id": "71217f58-06f9-484e-8621-8125726a75fe",
+      "name": "extension view policy by role",
+      "type": "aggregate",
+      "logic": "POSITIVE",
+      "decisionStrategy": "AFFIRMATIVE",
+      "config": {
+        "applyPolicies": "[\"has role view-extensions\",\"has role manage-extensions\"]"
+      }
+    },
+    {
+      "id": "be3fe27c-3401-4953-b634-4664cc05bc18",
+      "name": "parent-account-admin on account-10",
+      "type": "user",
+      "logic": "POSITIVE",
+      "decisionStrategy": "UNANIMOUS",
+      "config": {
+        "users": "[\"pa1_20\"]"
+      }
+    },
+    {
+      "id": "a6a546af-84c8-4425-9f1d-ed8d6e4199b5",
+      "name": "Default Permission",
+      "description": "A permission that applies to the default resource type",
+      "type": "resource",
+      "logic": "POSITIVE",
+      "decisionStrategy": "UNANIMOUS",
+      "config": {
+        "defaultResourceType": "urn:hdap-roles:resources:default",
+        "applyPolicies": "[\"Default Policy\"]"
+      }
+    },
+    {
+      "id": "0d2b1636-394d-44e6-b026-88d649a8496e",
+      "name": "extension management",
+      "type": "scope",
+      "logic": "POSITIVE",
+      "decisionStrategy": "UNANIMOUS",
+      "config": {
+        "resources": "[\"extensions\"]",
+        "scopes": "[\"extensions-view\",\"extensions-manage\"]",
+        "applyPolicies": "[\"has role manage-extensions\",\"user belongs to the same account\"]"
+      }
+    },
+    {
+      "id": "65baa080-3bae-4cf3-8946-3454904c3533",
+      "name": "extensions view1",
+      "type": "scope",
+      "logic": "POSITIVE",
+      "decisionStrategy": "UNANIMOUS",
+      "config": {
+        "resources": "[\"extensions\"]",
+        "scopes": "[\"extensions-view\"]",
+        "applyPolicies": "[\"has role view-extensions\",\"user belongs to the same account\"]"
+      }
+    },
+    {
+      "id": "aac6db47-0cd1-46cb-9b24-e0859529720a",
+      "name": "allow vsu any access to any resource",
+      "type": "scope",
+      "logic": "POSITIVE",
+      "decisionStrategy": "UNANIMOUS",
+      "config": {
+        "scopes": "[\"extensions-view\",\"extensions-manage\"]",
+        "applyPolicies": "[\"has vsu role\"]"
+      }
+    }
+  ],
+  "scopes": [
+    {
+      "id": "f6f227ac-2701-4b1c-8276-1e5a1943d73d",
+      "name": "extensions-manage"
+    },
+    {
+      "id": "694a7337-5b81-4a28-8c03-8d9a6ba3682a",
+      "name": "extensions-view"
+    },
+    {
+      "id": "dba6d7ce-07a1-40a1-adae-f778fed25a6f",
+      "name": "role-revoke"
+    },
+    {
+      "id": "88aaa040-185b-49f9-9caf-d890f6ecc770",
+      "name": "role-assign"
+    },
+    {
+      "id": "8e4f3b65-346c-470b-a2ba-0e19df02fb6f",
+      "name": "role-view"
+    }
+  ],
+  "decisionStrategy": "AFFIRMATIVE"
+}
